@@ -19,10 +19,7 @@ def main():
     df.reset_index(inplace=True)
     df.drop(columns='index', inplace=True, errors='ignore')
 
+    print(df)
+
     final = time.time()
     print(f'{final - start} segundos')
-
-
-if __name__ == '__main__':
-    main()
-# Inserir os métodos necessários e a documentação de cada arquivo.
