@@ -20,7 +20,6 @@ def main():
 
     # df = get_new_df()
     print(df)
-    # 919662
 
     final = time.time()
     print(f'{final - start} segundos')
