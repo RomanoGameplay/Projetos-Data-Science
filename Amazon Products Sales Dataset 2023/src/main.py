@@ -1,25 +1,87 @@
 import os
-from utils.load_data import load
-from cleaning import *
 import time
+import numpy as np
+from .utils.load_data import load, get_new_df, to_csv
+from .cleaning import *
 from parallel_pandas import ParallelPandas
 
 
 def main():
     ParallelPandas.initialize(n_cpu=os.cpu_count(), split_factor=4, disable_pr_bar=True)
-
     start = time.time()
-
     df = load()
     print(df.shape[0])
 
-    drop_na(df=df, thresh=4)
-    df = str_in_numeric_columns(df=df, column='no_of_ratings', re_exp='[a-zA-Z]')
+    drop_na_in_df(df=df)
+    fillna_in_df(df=df)
+    df = change_in_df(df=df)
+    df = replace_in_df(df=df)
+    df = to_csv(df=df, get_df=True)
 
-    df.reset_index(inplace=True)
-    df.drop(columns='index', inplace=True, errors='ignore')
-
+    # df = get_new_df()
     print(df)
+    # 919662
 
     final = time.time()
     print(f'{final - start} segundos')
+
+
+def drop_na_in_df(df: pd.DataFrame) -> None:
+    '''
+    Agrupa as operações centradas em eliminar valores nulos dentro do DataFrame.
+    :param df: Dataframe a ser manipulado.
+    :return: None
+    '''
+
+    drop_na(df=df, thresh=4)
+    df.dropna(subset='actual_price', inplace=True)
+
+
+def fillna_in_df(df: pd.DataFrame) -> None:
+    '''
+    Agrupa as operações centradas em preencher valores nulos dentro do DataFrame.
+    :param df: Dataframe a ser manipulado.
+    :return: None
+    '''
+
+    fill_na(df=df, columns=['ratings', 'no_of_ratings'], value=0)
+
+
+def change_in_df(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Agrupa operações centradas em realizar mudanças dentro de colunas no DataFrame.
+    :param df: Dataframe a ser manipulado.
+    :return: pandas.DataFrame
+    '''
+
+    df = str_in_numeric_columns(df=df, columns=['no_of_ratings', 'no_of_ratings'], re_exp='[a-zA-Z]')
+    return df
+
+
+def replace_in_df(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Agrupa operações centradas em realizar trocas de valores dentro do dataframe.
+    :param df: Dataframe a ser manipulado.
+    :return: pandas.DataFrame
+    '''
+
+    df = change_type_column(df=df, column='ratings', type='float')
+
+    list_special_characters = detect_special_characters(df, 'no_of_ratings')
+    df = replace_values(df=df, column='no_of_ratings', regex=True,
+                        old_values=list_special_characters, new_values='',
+                        transform_col=True, type='float')
+
+    list_special_characters = detect_special_characters(df, 'discount_price')
+    replace_values(df=df, column='discount_price', regex=True,
+                   old_values=list_special_characters, new_values='')
+    df = replace_values(df=df, column='discount_price', regex=True, old_values=np.nan, new_values=0, transform_col=True,
+                        type='float')
+
+    list_special_characters = detect_special_characters(df, 'actual_price')
+    df = replace_values(df=df, column='actual_price', regex=True,
+                        old_values=list_special_characters, new_values='',
+                        transform_col=True, type='float')
+    df = df[df['actual_price'] != 0]
+
+    return df

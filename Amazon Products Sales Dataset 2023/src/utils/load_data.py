@@ -1,12 +1,11 @@
 import os
 import pandas as pd
-from .constant import DIR_CSV_NAME, DF_FILE_NAME
+from .constant import DIR_CSV_NAME, DF_FILE_NAME, NEW_DF_FILE_NAME
+from typing import Union
 
 
 def load() -> pd.DataFrame:
     '''
-    :param DIR_CSV_NAME: Representa o nome do diretório no qual estão armazenados os arquivos .csv .
-    :param DF_FILE_NAME: Representa o nome do arquivo csv após a concatenação de todos os arquivos.
     :return: pandas.DataFrame
     '''
 
@@ -16,14 +15,12 @@ def load() -> pd.DataFrame:
         df = load_from_file_csv(cur_dir=cur_dir)
     else:
         df = load_data_from_dir(cur_dir=cur_dir)
-
     return df
 
 
 def load_data_from_dir(cur_dir: str) -> pd.DataFrame:
     '''
     :param cur_dir: Representa o caminho para o diretório atual.
-    :param DIR_CSV_NAME: Representa o nome do diretório no qual estão localizados os arquivos .csv .
     :return: pandas.DataFrame
     '''
 
@@ -44,10 +41,23 @@ def load_data_from_dir(cur_dir: str) -> pd.DataFrame:
 def load_from_file_csv(cur_dir: str) -> pd.DataFrame:
     '''
     :param cur_dir: Representa o caminho para o diretório atual.
-    :param DF_FILE_NAME: Representa o nome do arquivo csv após a concatenação de todos os arquivos.
     :return: pandas.DataFrame
     '''
     # Cria um dataframe diretamente do arquivo salvo.
     df = pd.read_csv(f'{cur_dir}/{DF_FILE_NAME}')
 
+    return df
+
+
+def to_csv(df: pd.DataFrame, get_df: bool = False) -> Union[pd.DataFrame, None]:
+    df.reset_index(inplace=True)
+    df.drop(columns='index', inplace=True, errors='ignore')
+    df.to_csv(NEW_DF_FILE_NAME, index=False)
+    if get_df:
+        return df
+
+
+def get_new_df() -> pd.DataFrame:
+    df = pd.read_csv(NEW_DF_FILE_NAME)
+    df.drop('Unnamed: 0', inplace=True, errors='ignore')
     return df
