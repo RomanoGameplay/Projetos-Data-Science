@@ -1,7 +1,8 @@
 import os
 import time
 import numpy as np
-from .utils.load_data import load, to_csv, NEW_DF_FILE_NAME
+from .utils.load_data import load, to_csv
+from .utils.constant import NEW_DF_FILE_NAME
 from .cleaning import *
 from parallel_pandas import ParallelPandas
 
