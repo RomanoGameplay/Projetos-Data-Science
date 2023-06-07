@@ -12,7 +12,10 @@ def load() -> pd.DataFrame:
     cur_dir = os.getcwd()
 
     if os.path.isfile(f'{cur_dir}/{DF_FILE_NAME}'):
-        df = load_from_file_csv(cur_dir=cur_dir)
+        if os.path.isfile(f'{cur_dir}/{NEW_DF_FILE_NAME}'):
+            df = load_new_df()
+        else:
+            df = load_from_file_csv(cur_dir=cur_dir)
     else:
         df = load_data_from_dir(cur_dir=cur_dir)
     return df
@@ -43,6 +46,7 @@ def load_from_file_csv(cur_dir: str) -> pd.DataFrame:
     :param cur_dir: Representa o caminho para o diretório atual.
     :return: pandas.DataFrame
     '''
+
     # Cria um dataframe diretamente do arquivo salvo.
     df = pd.read_csv(f'{cur_dir}/{DF_FILE_NAME}')
 
@@ -50,6 +54,12 @@ def load_from_file_csv(cur_dir: str) -> pd.DataFrame:
 
 
 def to_csv(df: pd.DataFrame, get_df: bool = False) -> Union[pd.DataFrame, None]:
+    '''
+    :param df: Dataframe a ser manipulado.
+    :param get_df: Verifica se o usuário deseja que retorne o dataframe.
+    :return: None | pandas.DataFrame
+    '''
+
     df.reset_index(inplace=True)
     df.drop(columns='index', inplace=True, errors='ignore')
     df.to_csv(NEW_DF_FILE_NAME, index=False)
@@ -57,7 +67,12 @@ def to_csv(df: pd.DataFrame, get_df: bool = False) -> Union[pd.DataFrame, None]:
         return df
 
 
-def get_new_df() -> pd.DataFrame:
+def load_new_df() -> pd.DataFrame:
+    '''
+    Carrega o arquivo csv após as operações de limpeza dos dados.
+    :return: pandas.DataFrame
+    '''
+
     df = pd.read_csv(NEW_DF_FILE_NAME)
     df.drop('Unnamed: 0', inplace=True, errors='ignore')
     return df

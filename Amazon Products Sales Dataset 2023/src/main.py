@@ -1,28 +1,33 @@
 import os
 import time
 import numpy as np
-from .utils.load_data import load, get_new_df, to_csv
+from .utils.load_data import load, to_csv, NEW_DF_FILE_NAME
 from .cleaning import *
 from parallel_pandas import ParallelPandas
 
 
-def main():
+def main() -> None:
+    '''
+    Função principal da qual realiza todas as operações necessárias para a limpeza de dados.
+    :return: None
+    '''
     ParallelPandas.initialize(n_cpu=os.cpu_count(), split_factor=4, disable_pr_bar=True)
     start = time.time()
     df = load()
     print(df.shape[0])
 
-    drop_na_in_df(df=df)
-    fillna_in_df(df=df)
-    df = change_in_df(df=df)
-    df = replace_in_df(df=df)
-    df = to_csv(df=df, get_df=True)
+    if not os.path.isfile(NEW_DF_FILE_NAME):
+        drop_na_in_df(df=df)
+        fillna_in_df(df=df)
+        df = change_in_df(df=df)
+        df = replace_in_df(df=df)
+        df = to_csv(df=df, get_df=True)
+    else:
+        pass
 
-    # df = get_new_df()
     print(df)
-
     final = time.time()
-    print(f'{final - start} segundos')
+    print(f'{round((final - start), 2)} segundos')
 
 
 def drop_na_in_df(df: pd.DataFrame) -> None:
