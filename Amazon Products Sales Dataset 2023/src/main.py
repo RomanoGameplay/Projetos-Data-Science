@@ -22,7 +22,7 @@ def main() -> None:
         fillna_in_df(df=df)
         df = change_in_df(df=df)
         df = replace_in_df(df=df)
-        df = to_csv(df=df, get_df=True)
+        # df = to_csv(df=df, get_df=True)
     else:
         pass
 

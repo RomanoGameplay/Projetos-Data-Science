@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from .constant import DIR_CSV_NAME, DF_FILE_NAME, NEW_DF_FILE_NAME
+from .constant import DIR_CSV_NAME, NEW_DF_FILE_NAME
 from typing import Union
 
 
@@ -10,12 +10,8 @@ def load() -> pd.DataFrame:
     '''
 
     cur_dir = os.getcwd()
-
-    if os.path.isfile(f'{cur_dir}/{DF_FILE_NAME}'):
-        if os.path.isfile(f'{cur_dir}/{NEW_DF_FILE_NAME}'):
-            df = load_new_df()
-        else:
-            df = load_from_file_csv(cur_dir=cur_dir)
+    if os.path.isfile(f'{cur_dir}/{NEW_DF_FILE_NAME}'):
+        df = load_new_df()
     else:
         df = load_data_from_dir(cur_dir=cur_dir)
     return df
@@ -37,18 +33,6 @@ def load_data_from_dir(cur_dir: str) -> pd.DataFrame:
     df = pd.concat(dataframes, ignore_index=True)
     df.drop(columns=['Unnamed: 0'], inplace=True, errors='ignore')
     df.to_csv('amazon_products_sales_dataset.csv', index=False)
-
-    return df
-
-
-def load_from_file_csv(cur_dir: str) -> pd.DataFrame:
-    '''
-    :param cur_dir: Representa o caminho para o diretório atual.
-    :return: pandas.DataFrame
-    '''
-
-    # Cria um dataframe diretamente do arquivo salvo.
-    df = pd.read_csv(f'{cur_dir}/{DF_FILE_NAME}')
 
     return df
 
