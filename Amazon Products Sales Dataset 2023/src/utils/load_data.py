@@ -32,7 +32,6 @@ def load_data_from_dir(cur_dir: str) -> pd.DataFrame:
     # Concatena os dataframes em um único dataframe
     df = pd.concat(dataframes, ignore_index=True)
     df.drop(columns=['Unnamed: 0'], inplace=True, errors='ignore')
-    df.to_csv('amazon_products_sales_dataset.csv', index=False)
 
     return df
 
