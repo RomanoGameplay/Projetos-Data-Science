@@ -26,18 +26,19 @@ def main() -> None:
 
         df = change_type_column(df=df, column='ratings', type='float')
 
-        list_special_characters = detect_special_characters(df, 'no_of_ratings')
+        list_special_characters = detect_special_characters(df=df, column='no_of_ratings')
         df = replace_values(df=df, column='no_of_ratings', regex=True,
                             old_values=list_special_characters, new_values='',
                             transform_col=True, type='float')
 
-        list_special_characters = detect_special_characters(df, 'discount_price')
+        list_special_characters = detect_special_characters(df=df, column='discount_price')
         replace_values(df=df, column='discount_price', regex=True,
                        old_values=list_special_characters, new_values='')
-        df = replace_values(df=df, column='discount_price', regex=True, old_values=np.nan, new_values=0, transform_col=True,
+        df = replace_values(df=df, column='discount_price', regex=True, old_values=np.nan, new_values=0,
+                            transform_col=True,
                             type='float')
 
-        list_special_characters = detect_special_characters(df, 'actual_price')
+        list_special_characters = detect_special_characters(df=df, column='actual_price')
         df = replace_values(df=df, column='actual_price', regex=True,
                             old_values=list_special_characters, new_values='',
                             transform_col=True, type='float')
@@ -45,10 +46,16 @@ def main() -> None:
         outliers = search_anomalies_by_standard_deviation(df=df, column='actual_price', show_df_values=False)
 
         df = df.loc[~df['actual_price'].isin(outliers)]
-        df = to_csv(df=df, get_df=True)
-    else:
-        pass
+
+        df.no_of_ratings.fillna(0, inplace=True)
+        df.ratings.fillna(0, inplace=True)
+        df.actual_price.fillna(0, inplace=True)
+        df.discount_price.fillna(0, inplace=True)
+
+        df.reset_index(inplace=True)
+        df.drop(columns='index', inplace=True, errors='ignore')
 
     print('novo número de linhas:', df.shape[0])
+    df = to_csv(df=df, get_df=True)
     final = time.time()
     print(f'{round((final - start), 2)} segundos')

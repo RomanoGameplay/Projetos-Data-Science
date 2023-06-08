@@ -12,14 +12,3 @@ def drop_na(df: pd.DataFrame, thresh: int) -> None:
         df.dropna(thresh=(10 - thresh), inplace=True)
     else:
         df.dropna(how='any', inplace=True)
-
-
-def fill_na(df: pd.DataFrame, columns: Union[str, list], value=0) -> None:
-    '''
-    :param df: DataFrame a ser manipulado
-    :param columns: coluna específica a ser preenchida.
-    :param value: Valor usado para preencher os valores nulos.
-    :return: None
-    '''
-    if isinstance(columns, str):
-        df[columns].fillna(value, inplace=True)
