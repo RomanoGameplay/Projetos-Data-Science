@@ -57,7 +57,7 @@ class BaseINEPETL(abc.ABC, BaseETL):
         """
         Realiza o donwload dos dados INEP para uma pasta local
         """
-        for arq, link in self.dicionario_para_baixar():
+        for arq, link in self.dicionario_para_baixar().items():
             caminho_arq = self.caminho_saida / arq
             download_dados_web(caminho_arq, link)
 
@@ -75,18 +75,3 @@ class BaseINEPETL(abc.ABC, BaseETL):
         Transforma os dados e os adequa para os formatos de saída de interesse.
         """
         pass
-
-    def load(self) -> None:
-        """
-        Exporta os dados transformados
-        """
-        for arq, df in self._dados_saida.items():
-            df.to_parquet(self.caminho_saida / arq, index=False)
-
-    def pipeline(self) -> None:
-        """
-        Executa o pipeline completo de tratamento de dados
-        """
-        self.extract()
-        self.transform()
-        self.load()
