@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from pandas import DataFrame
 
 from ....src.aquisicao.base_etl import BaseETL
+from ....src.utils.web import download_dados_web
 
 
 class BaseINEPETL(abc.ABC, BaseETL):
@@ -51,6 +52,14 @@ class BaseINEPETL(abc.ABC, BaseETL):
         para_baixar = self.le_pagina_inep()
         baixados = os.listdir(str(self.caminho_entrada))
         return {arq: link for arq, link in para_baixar.items() if arq not in baixados}
+
+    def donwload_conteudo(self) -> None:
+        """
+        Realiza o donwload dos dados INEP para uma pasta local
+        """
+        for arq, link in self.dicionario_para_baixar():
+            caminho_arq = self.caminho_saida / arq
+            download_dados_web(caminho_arq, link)
 
     @abc.abstractmethod
     def extract(self) -> None:
