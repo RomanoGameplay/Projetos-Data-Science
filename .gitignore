@@ -4,3 +4,5 @@
 *.zip
 *.xlsx
 /Educação/Dados (Amostra)/
+Educação/notebooks/.ipynb_checkpoints/Protótipo-checkpoint.ipynb
+Educação/notebooks/.ipynb_checkpoints/Exploração - Censo Escolar - Escolas-checkpoint.ipynb
