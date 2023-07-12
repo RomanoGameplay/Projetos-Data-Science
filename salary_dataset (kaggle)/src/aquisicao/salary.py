@@ -50,7 +50,7 @@ class GetData(BaseETL):
 
     def remove_salarios_abaixo_do_minimo(self, base: pd.DataFrame) -> None:
         ind = base[lambda f: f['Salary'] <= 16000].index
-        base = base.drop(index=ind)
+        base.drop(index=ind, inplace=True)
 
     def altera_valores(self, base: pd.DataFrame) -> None:
         base['Education Level'].replace("Master's", "Master's Degree", inplace=True)
@@ -104,5 +104,6 @@ class GetData(BaseETL):
         """
         Exporta os dados
         """
+        print(self._caminho_saida)
         for arq, df in self._dados_saida.items():
             df.to_csv(self._caminho_saida / f'{self._tabela}.csv', index=False)

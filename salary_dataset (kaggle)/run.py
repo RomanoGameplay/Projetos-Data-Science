@@ -28,7 +28,7 @@ def aquisicao() -> None:
 @click.option('--ext', '-ext', 'saida', default=CAMINHO_SAIDA,
               type=click.Path(path_type=Path, resolve_path=True, file_okay=False),
               help='Indica o caminho de saída dos dados')
-@click.option("--nao-criar-caminho", '-nao-criar-caminho', 'criar_caminho', is_flag=True, show_default=True,
+@click.option("--criar-caminho", '-cc', 'criar_caminho', is_flag=True, show_default=True,
               help='Flag indicando necessidade de criar os caminhos')
 @click.option('--re', '-re', 'reprocessar', is_flag=True, show_default=True,
               help='Flag indicando necessidade de reprocessar os dados')

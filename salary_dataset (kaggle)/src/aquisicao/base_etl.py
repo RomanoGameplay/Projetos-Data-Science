@@ -32,9 +32,8 @@ class BaseETL(abc.ABC):
         self._caminho_entrada = Path(entrada)
         self._caminho_saida = Path(saida)
 
-        if criar_caminho:
-            self._caminho_entrada.mkdir(parents=True, exist_ok=True)
-            self._caminho_saida.mkdir(parents=True, exist_ok=True)
+        self._caminho_entrada.mkdir(parents=True, exist_ok=True)
+        self._caminho_saida.mkdir(parents=True, exist_ok=True)
 
     def __str__(self) -> str:
         """
@@ -61,6 +60,7 @@ class BaseETL(abc.ABC):
         """
         Método protegido destinado a exportação dos dados
         """
+        raise NotImplementedError
 
     def extract(self) -> None:
         """
@@ -81,8 +81,7 @@ class BaseETL(abc.ABC):
         Exporta os dados transformados
         """
         self._logger.info(f'EXPORTANDO DADOS DO OBJETO {self}')
-        if self.reprocessar:
-            self._export()
+        self._export()
 
     def pipeline(self) -> None:
         """
