@@ -15,11 +15,41 @@ class BaseETL(abc.ABC):
     _dados_entrada: typing.Dict[str, pd.DataFrame]
     _dados_saida: typing.Dict[str, pd.DataFrame]
 
-    def __init__(self, entrada: str, saida: str) -> None:
+    def __init__(self, entrada: str, saida: str, criar_caminho: bool = True) -> None:
+        """
+        Instancia o objeto de ETL Base
+        :param entrada: String com o caminho para a pasta de entrada
+        :param saida: String indicando o caminho para a pasta de saida
+        :param criar_caminho: Flag indicando necessidade de criar caminho
+        """
+        self._dados_entrada = None
+        self._dados_saida = None
         self._caminho_entrada = Path(entrada)
         self._caminho_saida = Path(saida)
-        self._dados_entrada = dict()
-        self._dados_saida = dict()
+        if criar_caminho:
+            self._caminho_entrada.mkdir(parents=True, exist_ok=True)
+            self._caminho_saida.mkdir(parents=True, exist_ok=True)
+
+
+    @property
+    def dados_entrada(self) -> typing.Dict[str, pd.DataFrame]:
+        """
+        Acessa o dicionário com os dados de entrada
+        :return: Dicionário com o nome do arquivo de um dataframe com os dados de entrada
+        """
+        if self._dados_entrada is None:
+            self.extract()
+        return self._dados_entrada
+
+    @property
+    def dados_saida(self) -> typing.Dict[str, pd.DataFrame]:
+        """
+        Acessa o dicionário com os dados de saida
+        :return: Dicionário com o nome do arquivo de um dataframe com os dados de saida
+        """
+        if self._dados_saida is None:
+            self.extract()
+        return self._dados_saida
 
     @abc.abstractmethod
     def extract(self) -> None:
