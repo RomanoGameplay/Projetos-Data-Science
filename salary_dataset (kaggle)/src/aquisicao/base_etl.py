@@ -1,4 +1,5 @@
 import abc
+import os
 from pathlib import Path
 import typing
 import pandas as pd
@@ -22,8 +23,8 @@ class BaseETL(abc.ABC):
         :param saida: String indicando o caminho para a pasta de saida
         :param criar_caminho: Flag indicando necessidade de criar caminho
         """
-        self._dados_entrada = None
-        self._dados_saida = None
+        self._dados_entrada = dict()
+        self._dados_saida = dict()
         self._caminho_entrada = Path(entrada)
         self._caminho_saida = Path(saida)
         if criar_caminho:

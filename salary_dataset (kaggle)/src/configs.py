@@ -1,3 +1,0 @@
-PASTA_DADOS = 'dados'
-CAMINHO_ENTRADA = f'{PASTA_DADOS}/entrada'
-CAMINHO_SAIDA = f'{PASTA_DADOS}/saida'
