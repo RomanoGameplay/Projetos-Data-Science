@@ -104,6 +104,8 @@ class GetData(BaseETL):
         """
         Exporta os dados
         """
-        print(self._caminho_saida)
-        for arq, df in self._dados_saida.items():
-            df.to_csv(self._caminho_saida / f'{self._tabela}.csv', index=False)
+        exporta_csv(
+            caminho_saida=self._caminho_saida,
+            tabela=self._tabela,
+            dados_saida=self._dados_saida
+        )
