@@ -1,92 +1,51 @@
-import logging
-import typing
-from pathlib import Path
 import abc
+from pathlib import Path
+import typing
 import pandas as pd
 
 
 class BaseETL(abc.ABC):
     """
-    Classe responsável por instanciar o objeto que recuperará os dados
+    Classe responsável por estruturar como qualquer objeto de ETL
+    deve funcionar
     """
-    _logger: logging.Logger
-    reprocessar: bool
+
     _caminho_entrada: Path
     _caminho_saida: Path
     _dados_entrada: typing.Dict[str, pd.DataFrame]
     _dados_saida: typing.Dict[str, pd.DataFrame]
 
-    def __init__(self, entrada: Path, saida: Path, reprocessar: bool = True, criar_caminho: bool = True) -> None:
-        """
-        Método construtor da classe BaseETL
-
-        :param entrada: Indica o caminho de entrada dos dados
-        :param saida: Indica o caminho de saída dos dados
-        :param reprocessar: Flag indicando se deve reprocessar os dados
-        :param criar_caminho: Flag indicando se deve criar os caminhos
-        """
-        self._logger = logging.getLogger(__name__)
-        self.reprocessar = reprocessar
-        self._dados_entrada = dict()
-        self._dados_saida = dict()
+    def __init__(self, entrada: str, saida: str) -> None:
         self._caminho_entrada = Path(entrada)
         self._caminho_saida = Path(saida)
-
-        self._caminho_entrada.mkdir(parents=True, exist_ok=True)
-        self._caminho_saida.mkdir(parents=True, exist_ok=True)
-
-    def __str__(self) -> str:
-        """
-        Representação de texto da classe
-        """
-        return self.__class__.__name__
+        self._dados_entrada = dict()
+        self._dados_saida = dict()
 
     @abc.abstractmethod
-    def _extract(self) -> None:
-        """
-        Método protegido destinado a extração dos dados
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _transform(self) -> None:
-        """
-        Método protegido destinado a transformação dos dados
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _export(self) -> None:
-        """
-        Método protegido destinado a exportação dos dados
-        """
-        raise NotImplementedError
-
     def extract(self) -> None:
         """
-        Carrega os dados
+        Extrai os dados do objeto
         """
-        self._logger.info(f'EXTRAINDO DADOS DO OBJETO {self}')
-        self._extract()
+        pass
 
+    @abc.abstractmethod
     def transform(self) -> None:
         """
-        Transforma os dados carregados
+        Transforma os dados e os adequa para os formatos de saida de interesse
         """
-        self._logger.info(f'TRANSFORMANDO DADOS DO OBJETO {self}')
-        self._transform()
+        pass
 
-    def export(self) -> None:
+    def load(self) -> None:
         """
         Exporta os dados transformados
         """
-        self._logger.info(f'EXPORTANDO DADOS DO OBJETO {self}')
-        self._export()
+        for arq, df in self._dados_saida.items():
+            df.to_csv(self._caminho_saida / arq, index=False)
 
     def pipeline(self) -> None:
         """
-        Executa as tarefas de extração, transformação e exportação dos dados
+        Executa o pipeline completo de tratamento dos dados
         """
         self.extract()
         self.transform()
-        self.export()
+        self.load()
