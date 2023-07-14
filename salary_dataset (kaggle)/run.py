@@ -1,7 +1,7 @@
 import click
 from src.utils.logs import configura_logs
 from src.aquisicao.opcoes import EnumETL, ETL_DICT
-from src.utils.configs import *
+from src.configs import *
 
 
 @click.group()

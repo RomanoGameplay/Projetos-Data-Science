@@ -13,7 +13,7 @@ class SALARYETL(BaseETL, abc.ABC):
     _tabela: str
     _configs: typing.Dict[str, typing.Any]
 
-    def __init__(self, entrada: str, saida: str, tabela: str, criar_caminho: bool = True) -> None:
+    def __init__(self, entrada: str, saida: str, criar_caminho: bool = True) -> None:
         """
         Instancia o objeto de ETL Base
         :param entrada: String com o caminho para a pasta de entrada
@@ -22,7 +22,7 @@ class SALARYETL(BaseETL, abc.ABC):
         :param criar_caminho: Flag indicando necessidade de criar caminho
         """
         super().__init__(entrada, saida, criar_caminho)
-        self._tabela = tabela
+        self._tabela = 'Salary_Data'
         self._configs = carrega_yaml('aquisicao_salary.yml')
 
     def extract(self) -> None:
@@ -108,7 +108,6 @@ class SALARYETL(BaseETL, abc.ABC):
         """
         self.logger.info('Iniciando transformação do conjunto de dados')
         for tabela, base in self.dados_entrada.items():
-            print(base)
             self.logger.info(f'Renomeando colunas de dados')
             self.renomeia_colunas(base)
             self.logger.info('Dropando dados nulos')
@@ -126,3 +125,4 @@ class SALARYETL(BaseETL, abc.ABC):
                 ("Master's", "Bachelor's", "phD"),
                 ("Master's Degree", "bachelor's Degree", "PhD")
             )
+            print(base)

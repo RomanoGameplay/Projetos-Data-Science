@@ -3,7 +3,7 @@ import typing
 from pathlib import Path
 
 
-CAMINHO_INFO = Path(__file__).parent / 'info'
+CAMINHO_INFO = Path(__file__).parent.parent / 'info'
 
 
 def carrega_yaml(nome_yaml: str) -> typing.Dict[str, typing.Any]:
@@ -15,4 +15,4 @@ def carrega_yaml(nome_yaml: str) -> typing.Dict[str, typing.Any]:
     """
     global CAMINHO_INFO
     with open(CAMINHO_INFO / nome_yaml, 'r') as f:
-        return yaml.load(f)
+        return yaml.load(f, Loader=yaml.FullLoader)
