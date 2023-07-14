@@ -125,4 +125,3 @@ class SALARYETL(BaseETL, abc.ABC):
                 ("Master's", "Bachelor's", "phD"),
                 ("Master's Degree", "bachelor's Degree", "PhD")
             )
-            print(base)
