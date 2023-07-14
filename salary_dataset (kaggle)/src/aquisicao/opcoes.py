@@ -1,5 +1,5 @@
 from enum import Enum
-from .salary import SALARYETL
+from salary import SALARYETL
 
 
 class EnumETL(Enum):

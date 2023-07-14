@@ -2,8 +2,8 @@ import abc
 import typing
 import numpy as np
 import pandas as pd
-from .base_etl import BaseETL
-from .info import carrega_yaml
+from base_etl import BaseETL
+from src.utils.info import carrega_yaml
 from tqdm import tqdm
 
 
@@ -19,7 +19,6 @@ class SALARYETL(BaseETL, abc.ABC):
         Instancia o objeto de ETL Base
         :param entrada: String com o caminho para a pasta de entrada
         :param saida: String indicando o caminho para a pasta de saida
-        :param tabela: Tabela de dados a ser processada
         :param criar_caminho: Flag indicando necessidade de criar caminho
         """
         super().__init__(entrada, saida, criar_caminho)
