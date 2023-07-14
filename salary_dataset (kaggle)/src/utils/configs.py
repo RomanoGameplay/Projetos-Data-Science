@@ -1,6 +1,9 @@
 import os
 
 PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PASTA_DADOS = PROJECT_PATH / 'dados'
-CAMINHO_ENTRADA = PASTA_DADOS / 'entrada'
-CAMINHO_SAIDA = PASTA_DADOS / 'saida'
+PASTA_DADOS = f'{PROJECT_PATH}/dados'
+CAMINHO_ENTRADA = f'{PASTA_DADOS}/entrada'
+CAMINHO_SAIDA = f'{PASTA_DADOS}/saida'
+
+
+for s in zip(('a', 'b', 'c'), ('d', 'e', 'f')): print(s)

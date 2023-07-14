@@ -1,8 +1,7 @@
 import click
-import pandas as pd
-
+from src.utils.logs import configura_logs
 from src.aquisicao.opcoes import EnumETL, ETL_DICT
-from src.configs import *
+from src.utils.configs import *
 
 
 @click.group()
@@ -32,6 +31,7 @@ def processa_dado(etl: str, entrada: str, saida: str, criar_caminho: bool) -> No
     :param saida: String indicando o caminho para a pasta de saida
     :param criar_caminho: Flag indicando necessidade de criar caminho
     """
+    configura_logs()
     obj = ETL_DICT[EnumETL(etl)](entrada, saida, criar_caminho)
     obj.pipeline()
 
