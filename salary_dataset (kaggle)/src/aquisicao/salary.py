@@ -2,8 +2,8 @@ import abc
 import typing
 import numpy as np
 import pandas as pd
-from base_etl import BaseETL
-from info import carrega_yaml
+from .base_etl import BaseETL
+from .info import carrega_yaml
 
 
 class SALARYETL(BaseETL, abc.ABC):
