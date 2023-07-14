@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from .base_etl import BaseETL
 from .info import carrega_yaml
+from tqdm import tqdm
 
 
 class SALARYETL(BaseETL, abc.ABC):
@@ -30,7 +31,9 @@ class SALARYETL(BaseETL, abc.ABC):
         Extrai os dados do objeto
         """
         # carrega tabelas de interesse
-        self._dados_entrada[self._tabela] = pd.read_csv(self._caminho_entrada / f'{self._tabela}.csv')
+        self.logger.info('Carregando base de dados')
+        for tabela in tqdm([self._tabela]):
+            self._dados_entrada[tabela] = pd.read_csv(self._caminho_entrada / f'{tabela}.csv')
 
     def renomeia_colunas(self, base: pd.DataFrame) -> None:
         """
@@ -102,13 +105,16 @@ class SALARYETL(BaseETL, abc.ABC):
         base['Education Level'] = base['Education Level'].astype('category')
         base['Job Title'] = base['Job Title'].astype('category')
 
+    def exporta_dados(self, base: pd.DataFrame) -> None:
+        base.to_csv(self._caminho_saida / f'{self._tabela}.csv')
+
     def transform(self) -> None:
         """
         Transforma os dados e os adequa para os formatos de saida de interesse
         """
         self.logger.info('Iniciando transformação do conjunto de dados')
         for tabela, base in self.dados_entrada.items():
-            self.logger.info(f'Renomeando colunas de dados')
+            self.logger.info('Renomeando colunas de dados')
             self.renomeia_colunas(base)
             self.logger.info('Dropando dados nulos')
             self.dropa_nulos(base, how='all')
@@ -118,10 +124,12 @@ class SALARYETL(BaseETL, abc.ABC):
             self.dropa_nulos(base)
             self.logger.info('Dropando salários abaixo do valor mínimo anual')
             self.dropa_salarios(base)
-            self.logger.info(f'Substituindo valores')
+            self.logger.info('Substituindo valores')
             self.substitue_valores(
                 base,
                 'Education Level',
                 ("Master's", "Bachelor's", "phD"),
                 ("Master's Degree", "bachelor's Degree", "PhD")
             )
+            self.logger.info('Exportando dados')
+            self.exporta_dados(base)
