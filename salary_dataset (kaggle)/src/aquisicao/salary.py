@@ -2,19 +2,20 @@ import abc
 import typing
 import numpy as np
 import pandas as pd
-from base_etl import BaseETL
+from .base_etl import BaseETL
 from src.utils.info import carrega_yaml
 from tqdm import tqdm
+from pathlib import Path
 
 
-class SALARYETL(BaseETL, abc.ABC):
+class SalaryETL(BaseETL, abc.ABC):
     """
     Instancia objeto responsável por processamento da base de dados
     """
     _tabela: str
     _configs: typing.Dict[str, typing.Any]
 
-    def __init__(self, entrada: str, saida: str, criar_caminho: bool = True) -> None:
+    def __init__(self, entrada: Path, saida: Path, criar_caminho: bool = True) -> None:
         """
         Instancia o objeto de ETL Base
         :param entrada: String com o caminho para a pasta de entrada
@@ -130,5 +131,7 @@ class SALARYETL(BaseETL, abc.ABC):
                 ("Master's", "Bachelor's", "phD"),
                 ("Master's Degree", "bachelor's Degree", "PhD")
             )
+            self.logger.info('Convertendo tipo de dados')
+            self.converte_dtypes(base)
             self.logger.info('Exportando dados')
             self.exporta_dados(base)

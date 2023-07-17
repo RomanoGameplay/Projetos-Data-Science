@@ -1,5 +1,5 @@
 from enum import Enum
-from salary import SALARYETL
+from .salary import SalaryETL
 
 
 class EnumETL(Enum):
@@ -9,5 +9,5 @@ class EnumETL(Enum):
 # Chave = Enum
 # Valor = Classe de objeto ETL
 ETL_DICT = {
-    EnumETL.salary: SALARYETL
+    EnumETL.salary: SalaryETL
 }

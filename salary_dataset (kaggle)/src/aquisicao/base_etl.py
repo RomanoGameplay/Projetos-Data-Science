@@ -17,7 +17,7 @@ class BaseETL(abc.ABC):
     _dados_saida: typing.Dict[str, pd.DataFrame]
     logger: logging.Logger
 
-    def __init__(self, entrada: str, saida: str, criar_caminho: bool = True) -> None:
+    def __init__(self, entrada: Path, saida: Path, criar_caminho: bool = True) -> None:
         """
         Instancia o objeto de ETL Base
         :param entrada: String com o caminho para a pasta de entrada
@@ -26,8 +26,8 @@ class BaseETL(abc.ABC):
         """
         self._dados_entrada = dict()
         self._dados_saida = dict()
-        self._caminho_entrada = Path(entrada)
-        self._caminho_saida = Path(saida)
+        self._caminho_entrada = entrada
+        self._caminho_saida = saida
         if criar_caminho:
             self._caminho_entrada.mkdir(parents=True, exist_ok=True)
             self._caminho_saida.mkdir(parents=True, exist_ok=True)
