@@ -1,8 +1,6 @@
 from pathlib import Path
 
 import click
-
-from src.aquisicao.executa import executa_etl
 from src.aquisicao.opcoes import EnumMovies, ETL_DICT
 from src.configs import CAMINHO_ENTRADA, CAMINHO_SAIDA
 from src.utils.logs import configura_logs
