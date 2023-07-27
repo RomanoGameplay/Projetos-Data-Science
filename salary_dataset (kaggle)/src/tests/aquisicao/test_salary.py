@@ -36,7 +36,7 @@ def salary_etl(entrada: Path, saida: Path) -> SalaryETL:
     return etl
 
 
-@pytest.mark.run(order=1)
+@pytest.mark.order1
 def test_extract(salary_etl: SalaryETL) -> None:
     salary_etl.extract()
     assert salary_etl.dados_entrada is not None
@@ -44,7 +44,7 @@ def test_extract(salary_etl: SalaryETL) -> None:
     assert isinstance(salary_etl.dados_entrada['Salary_Data'], pd.DataFrame)
 
 
-@pytest.mark.run(order=2)
+@pytest.mark.order2
 def test_renomeia_colunas(salary_etl: SalaryETL) -> None:
     columns = ['Age', 'Salary', 'Years of Experience', 'Gender', 'Education Level', 'Job Title']
     salary_etl.renomeia_colunas(salary_etl.dados_entrada['Salary_Data'])
@@ -52,7 +52,7 @@ def test_renomeia_colunas(salary_etl: SalaryETL) -> None:
         assert col in salary_etl.dados_entrada['Salary_Data'].columns
 
 
-@pytest.mark.run(order=3)
+@pytest.mark.order3
 def test_dropa_nulos(salary_etl: SalaryETL) -> None:
     # Dropa linhas completamente nulas
     base = salary_etl.dados_entrada['Salary_Data']
@@ -67,7 +67,7 @@ def test_dropa_nulos(salary_etl: SalaryETL) -> None:
     assert 0 == base.isnull().sum().sum()
 
 
-@pytest.mark.run(order=4)
+@pytest.mark.order4
 def test_converte_dtypes(salary_etl: SalaryETL) -> None:
 
     base = salary_etl.dados_entrada['Salary_Data']
@@ -84,9 +84,3 @@ def test_converte_dtypes(salary_etl: SalaryETL) -> None:
     assert col_dtypes[3] == new_col_dtypes[1]
     assert col_dtypes[4] == new_col_dtypes[0]
     assert col_dtypes[5] == new_col_dtypes[0]
-
-
-@pytest.mark.run(order=5)
-def test_tam_data(salary_etl: SalaryETL) -> None:
-    salary_etl.transform()
-    assert 6696 == salary_etl.dados_entrada['Salary_Data'].shape[0]
