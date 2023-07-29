@@ -4,6 +4,7 @@ import click
 from src.aquisicao.opcoes import EnumMovies, ETL_DICT
 from src.configs import CAMINHO_ENTRADA, CAMINHO_SAIDA
 from src.utils.logs import configura_logs
+from src.aquisicao.executa import executa_etl
 
 
 @click.group()
@@ -23,7 +24,7 @@ def aquisicao() -> None:
 
 
 @aquisicao.command()
-@click.option('--etl', '-etl', 'etl', type=click.Choice([s.value for s in EnumMovies]),
+@click.option('--etl', '-etl', 'etl', default='MOVIES', type=click.Choice([s.value for s in EnumMovies]),
               help='Nome do ETL a ser executado')
 @click.option('--entrada', '-e', 'entrada', default=CAMINHO_ENTRADA, help='Caminho de entrada os dados',
               type=click.Path(resolve_path=True, path_type=Path, file_okay=False))
@@ -43,8 +44,13 @@ def processa_dado(etl: str, entrada: Path, saida: Path, nao_criar_caminho: bool,
     :param nao_reprocessar: Flag indicando necessidade de reprocessamento dos dados
     """
     configura_logs()
-    obj = ETL_DICT[EnumMovies(etl)](entrada, saida, nao_criar_caminho, nao_reprocessar)
-    obj.pipeline()
+    executa_etl(
+        etl=etl,
+        entrada=entrada,
+        saida=saida,
+        criar_caminho=not nao_criar_caminho,
+        reprocessar=not nao_reprocessar
+    )
 
 
 if __name__ == '__main__':
