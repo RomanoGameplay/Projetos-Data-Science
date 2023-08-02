@@ -90,9 +90,9 @@ class MoviesETL(BaseMovieETL, abc.ABC):
                                            f['released'].str.split(' ', expand=True)[0] + '/' + f['year']).str.replace(
                 '"', ''), format='%d/%B/%Y'),
             country=lambda f: (
-                        f['released'].str.split(' ', expand=True)[3] + ' ' + f['released'].str.split(' ', expand=True)[
-                    4]).str.replace('["()]', '', regex=True)).drop(['released', 'year'], axis=1).replace('"', '',
-                                                                                                         regex=True)
+                    f['released'].str.split(' ', expand=True)[3] + ' ' + f['released'].str.split(' ', expand=True)[
+                4]).str.replace('["()]', '', regex=True)).drop(['released', 'year'], axis=1).replace('"', '',
+                                                                                                     regex=True)
         return base
 
     @classmethod

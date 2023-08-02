@@ -4,7 +4,6 @@ import typing
 from pathlib import Path
 
 import pandas as pd
-from tqdm import tqdm
 
 
 class BaseMovieETL(abc.ABC):
