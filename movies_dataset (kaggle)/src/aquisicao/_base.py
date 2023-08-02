@@ -76,8 +76,8 @@ class BaseMovieETL(abc.ABC):
         Exporta os dados
         """
         self._logger.info('EXPORTANDO OS DADOS')
-        for arq, df in tqdm([self._dados_saida.items()]):
-            df.to_csv(self._cam_saida / arq, index=False)
+        for arq, df in self._dados_saida.items():
+            df.to_csv(self._cam_saida / f'{arq}.csv', index=False)
 
     def pipeline(self) -> None:
         """

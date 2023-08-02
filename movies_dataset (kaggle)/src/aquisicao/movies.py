@@ -19,7 +19,6 @@ class MoviesETL(BaseMovieETL, abc.ABC):
 
     def __init__(self, entrada: Path, saida: Path, criar_caminho: bool = True, reprocessar: bool = False):
         super().__init__(entrada, saida, criar_caminho, reprocessar)
-
         self._tabela = 'movies'
         self._configs = carrega_yaml('aquisicao_movies.yml')
 
@@ -30,33 +29,6 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         self._logger.info('CARREGANDO DADOS...')
         for tabela in tqdm([self._tabela]):
             self.dados_entrada[tabela] = pd.read_csv(self._cam_entrada / f'{tabela}.csv')
-
-    def transform(self) -> None:
-        """
-        Transforma os dados
-        """
-        self._logger.info('INICIANDO TRANSFORMAÇÃO DOS DADOS...')
-        for tabela, base in self.dados_entrada.items():
-            self._logger.info('TRATANDO COLUNAS')
-            cols = self.multiple_replaces(str(base.columns.values),
-                                          [('"', ''), ('[', ''), (']', ''), (',', ''), ("'", ''), ('\n', ''),
-                                           ('Unnamed: 1', ''), ('Unnamed: 2', '')]).strip().split(';')
-            self.trata_colunas(base, cols)
-            self.dropa_colunas(base)
-            self._logger.info('ELIMINANDO LINHAS NULAS')
-            self.dropa_nulos(base)
-            self._logger.info('SEPARANDO INFORMAÇÕES DA COLUNA "released"')
-            self.trata_col_released(base)
-            self._logger.info('PREENCHENDO VALORES NULOS')
-            self.preenche_nulos(base)
-            self._logger.info('SUBSTITUINDO VALORES DENTRO DAS COLUNAS')
-            self.replace_values_in_cols(base)
-            self._logger.info('REDUZINDO USO DE MEMÓRIA')
-            self.converte_dtypes(base)
-            self._logger.info('RENOMEANDO COLUNAS')
-            self.renomeia_colunas(base)
-
-            self.dados_saida[tabela] = base
 
     def multiple_replaces(self, string: str, replacements: typing.List[typing.Tuple[str, str]]) -> str:
         """
@@ -69,32 +41,37 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             string = string.replace(old, new)
         return string
 
-    def trata_colunas(self, base: pd.DataFrame, cols: typing.List[str]) -> None:
+    @classmethod
+    def adiciona_colunas(cls, base: pd.DataFrame, cols: list) -> pd.DataFrame:
         """
         Trata as colunas do conjunto de dados
         :param base: Dataframe a ser manipulado
-        :param cols: Colunas a serem inseridas
+        :param cols: Lista de colunas a serem inseridas
         """
         base = base.assign(
             DadosJuntos=lambda f: f.iloc[:, 0] + f.iloc[:, 1]
         )
         base[cols] = base['DadosJuntos'].str.split(';', expand=True)
+        return base
 
-    def dropa_colunas(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def dropa_colunas(cls, base: pd.DataFrame) -> None:
         """
         Dropa as colunas desnecessárias dentro do conjunto de dados
         :param base: Dataframe a ser manipulado
         """
-        base.drop(columns=base.columns[:3], axis=1, inplace=True)
+        base.drop(columns=base.columns[:4], axis=1, inplace=True)
 
-    def dropa_nulos(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def dropa_nulos(cls, base: pd.DataFrame) -> None:
         """
         Dropa as linhas que são totalmente nulas
         :param base: Dataframe a ser manipulado
         """
         base.dropna(how='all', inplace=True)
 
-    def preenche_nulos(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def preenche_nulos(cls, base: pd.DataFrame) -> None:
         """
         Preenche nulos de uma coluna
         :param base: Dataframe a ser manipulado
@@ -102,7 +79,8 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         base['runtime'].fillna(0, inplace=True)
         base['country'].fillna('País não informado', inplace=True)
 
-    def trata_col_released(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def trata_col_released(cls, base: pd.DataFrame) -> pd.DataFrame:
         """
         Trata a coluna "released"
         :param base: Dataframe a ser manipulado
@@ -115,8 +93,10 @@ class MoviesETL(BaseMovieETL, abc.ABC):
                         f['released'].str.split(' ', expand=True)[3] + ' ' + f['released'].str.split(' ', expand=True)[
                     4]).str.replace('["()]', '', regex=True)).drop(['released', 'year'], axis=1).replace('"', '',
                                                                                                          regex=True)
+        return base
 
-    def replace_values_in_cols(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def replace_values_in_cols(cls, base: pd.DataFrame) -> None:
         """
         Substitui valores dentro das colunas
         :param base: Dataframe a ser manipulado
@@ -132,7 +112,8 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         for vals in vals_to_replace:
             base['country'] = base['country'].replace(vals[0], vals[1], regex=True)
 
-    def converte_dtypes(self, base: pd.DataFrame) -> None:
+    @classmethod
+    def converte_dtypes(cls, base: pd.DataFrame) -> pd.DataFrame:
         """
         Converte os tipos de dados de cada coluna, afim de reduzir o uso de memória
         :param base: Dataframe a ser manipulado
@@ -149,6 +130,7 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             gross=lambda f: f['gross'].replace('', 0, regex=True).astype(float),
             runtime=lambda f: f['runtime'].astype(float).astype(np.uint8)
         )
+        return base
 
     def renomeia_colunas(self, base: pd.DataFrame) -> None:
         """
@@ -159,3 +141,29 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             columns=self._configs['RENOMEIA_COLUNAS'],
             inplace=True
         )
+
+    def transform(self) -> None:
+        """
+        Transforma os dados
+        """
+        self._logger.info('INICIANDO TRANSFORMAÇÃO DOS DADOS...')
+        for tabela, base in self.dados_entrada.items():
+            self._logger.info('TRATANDO COLUNAS')
+            cols = self.multiple_replaces(str(base.columns.values),
+                                          [('"', ''), ('[', ''), (']', ''), (',', ''), ("'", ''), ('\n', ''),
+                                           ('Unnamed: 1', ''), ('Unnamed: 2', '')]).strip().split(';')
+            base = self.adiciona_colunas(base, cols)
+            self.dropa_colunas(base)
+            self._logger.info('ELIMINANDO LINHAS NULAS')
+            self.dropa_nulos(base)
+            self._logger.info('SEPARANDO INFORMAÇÕES DA COLUNA "released"')
+            base = self.trata_col_released(base)
+            self._logger.info('PREENCHENDO VALORES NULOS')
+            self.preenche_nulos(base)
+            self._logger.info('SUBSTITUINDO VALORES DENTRO DAS COLUNAS')
+            self.replace_values_in_cols(base)
+            self._logger.info('REDUZINDO USO DE MEMÓRIA')
+            base = self.converte_dtypes(base)
+            self._logger.info('RENOMEANDO COLUNAS')
+            self.renomeia_colunas(base)
+            self._dados_saida[tabela] = base
