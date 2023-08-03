@@ -2,12 +2,10 @@ import abc
 import typing
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 from src.aquisicao._base import BaseMovieETL
-from src.utils.info import carrega_yaml
 
 
 class MoviesETL(BaseMovieETL, abc.ABC):
@@ -20,7 +18,6 @@ class MoviesETL(BaseMovieETL, abc.ABC):
     def __init__(self, entrada: Path, saida: Path, criar_caminho: bool = True, reprocessar: bool = False):
         super().__init__(entrada, saida, criar_caminho, reprocessar)
         self._tabela = 'movies'
-        self._configs = carrega_yaml('aquisicao_movies.yml')
 
     def extract(self) -> None:
         """
@@ -114,37 +111,6 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         for vals in vals_to_replace:
             base['country'] = base['country'].replace(vals[0], vals[1], regex=True)
 
-    @classmethod
-    def converte_dtypes(cls, base: pd.DataFrame) -> pd.DataFrame:
-        """
-        Converte os tipos de dados de cada coluna, afim de reduzir o uso de memória
-        :param base: Dataframe a ser manipulado
-        :return: Retorna um dataframe com os dtypes convertidos
-        """
-        base = base.assign(
-            rating=lambda f: f['rating'].astype('category'),
-            genre=lambda f: f['genre'].astype('category'),
-            country=lambda f: f['country'].astype('category')
-        )
-        base = base.assign(
-            score=lambda f: f['score'].astype(float),
-            votes=lambda f: f['votes'].astype(float).astype(np.uint),
-            budget=lambda f: f['budget'].astype(float),
-            gross=lambda f: f['gross'].replace('', 0, regex=True).astype(float),
-            runtime=lambda f: f['runtime'].astype(float).astype(np.uint8)
-        )
-        return base
-
-    def renomeia_colunas(self, base: pd.DataFrame) -> None:
-        """
-        Renomeia as colunas do conjunto de dados
-        :param base: Dataframe a ser manipulado
-        """
-        base.rename(
-            columns=self._configs['RENOMEIA_COLUNAS'],
-            inplace=True
-        )
-
     def transform(self) -> None:
         """
         Transforma os dados
@@ -165,8 +131,4 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             self.preenche_nulos(base)
             self._logger.info('SUBSTITUINDO VALORES DENTRO DAS COLUNAS')
             self.replace_values_in_cols(base)
-            self._logger.info('REDUZINDO USO DE MEMÓRIA')
-            base = self.converte_dtypes(base)
-            self._logger.info('RENOMEANDO COLUNAS')
-            self.renomeia_colunas(base)
             self._dados_saida[tabela] = base

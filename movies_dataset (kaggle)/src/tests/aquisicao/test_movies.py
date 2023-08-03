@@ -102,7 +102,6 @@ def test_trata_col_released(movies_etl: MoviesETL) -> None:
     base = movies_etl.trata_col_released(base)
     for col in new_cols:
         assert col in base.columns
-
     movies_etl.dados_entrada['movies'] = base
 
 
@@ -112,15 +111,6 @@ def test_preenche_nulos(movies_etl: MoviesETL) -> None:
     movies_etl.preenche_nulos(base)
     assert base['runtime'].isnull().sum().sum() == 0
     assert base['country'].isnull().sum().sum() == 0
-
-
-@pytest.mark.order7
-def test_converte_dtypes(movies_etl: MoviesETL) -> None:
-    base = movies_etl.dados_entrada['movies']
-    base = movies_etl.converte_dtypes(base)
-    for col, dtype in INFO['DADOS_SCHEMA'].items():
-        assert base[col].dtype == dtype
-
 
 @pytest.mark.order8
 def test_renomeia_colunas(movies_etl: MoviesETL) -> None:
