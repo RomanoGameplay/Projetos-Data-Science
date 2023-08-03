@@ -55,4 +55,3 @@ def processa_dado(etl: str, entrada: Path, saida: Path, nao_criar_caminho: bool,
 
 if __name__ == '__main__':
     grupo_principal()
-    # Executar o tratamento dos dados e configuração de arquivos ymal para renomear colunas.
