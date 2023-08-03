@@ -47,6 +47,7 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         Trata as colunas do conjunto de dados
         :param base: Dataframe a ser manipulado
         :param cols: Lista de colunas a serem inseridas
+        :return: Retorna o dataframe com as colunas adicionadas
         """
         base = base.assign(
             DadosJuntos=lambda f: f.iloc[:, 0] + f.iloc[:, 1]
@@ -84,6 +85,7 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         """
         Trata a coluna "released"
         :param base: Dataframe a ser manipulado
+        :return: Retorna um datraframe após os tratamentos
         """
         base = base.assign(
             date=lambda f: pd.to_datetime((f['released'].str.split(' ', expand=True)[1] + '/' +
@@ -117,6 +119,7 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         """
         Converte os tipos de dados de cada coluna, afim de reduzir o uso de memória
         :param base: Dataframe a ser manipulado
+        :return: Retorna um dataframe com os dtypes convertidos
         """
         base = base.assign(
             rating=lambda f: f['rating'].astype('category'),

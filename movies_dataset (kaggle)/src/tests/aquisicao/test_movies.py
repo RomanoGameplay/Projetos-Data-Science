@@ -5,6 +5,10 @@ import pytest
 
 from src.aquisicao.movies import MoviesETL
 from src.configs import PROJECT_PATH
+from src.utils.info import carrega_yaml
+
+
+INFO = carrega_yaml('aquisicao_movies.yml')
 
 
 @pytest.fixture(scope='module')
@@ -45,5 +49,82 @@ def test_extract(movies_etl: MoviesETL) -> None:
 
 
 @pytest.mark.order2
-def test_multiple_replaces(movies_etl: MoviesETL) -> None:
-    pass
+def test_adiciona_colunas(movies_etl: MoviesETL) -> None:
+    base = movies_etl.dados_entrada['movies']
+    cols = str(base.columns.values)
+    replacements = [('"', ''), ('[', ''), (']', ''), (',', ''), ("'", ''), ('\n', ''), ('Unnamed: 1', ''),
+                    ('Unnamed: 2', '')]
+    new_cols = movies_etl.multiple_replaces(
+        string=cols,
+        replacements=replacements
+    )
+    assert isinstance(new_cols, str)
+    new_cols = new_cols.strip().split(';')
+    assert isinstance(new_cols, list)
+
+    base = movies_etl.adiciona_colunas(
+        base=base,
+        cols=new_cols
+    )
+
+    for col in new_cols:
+        assert col in base.columns.values
+
+    movies_etl.dados_entrada['movies'] = base
+
+
+@pytest.mark.order3
+def test_dropa_colunas(movies_etl: MoviesETL) -> None:
+    name_col = 'name;"rating";"genre";"year";"released";"score";"votes";"director";"writer";"star";"country";' \
+               '"budget";"gross";"company";"runtime"'
+    base = movies_etl.dados_entrada['movies']
+    cols = ['Unnamed: 0', 'Unnamed: 1', 'DadosJuntos',
+            name_col]
+    movies_etl.dropa_colunas(base)
+    assert cols not in base.columns.values
+
+
+@pytest.mark.order4
+def test_dropa_nulos(movies_etl: MoviesETL) -> None:
+    base = movies_etl.dados_entrada['movies']
+    num_nulos_antes = base.isnull().sum().sum()
+    movies_etl.dropa_nulos(
+        base=base
+    )
+    num_nulos_depois = base.isnull().sum().sum()
+    assert num_nulos_antes != num_nulos_depois
+
+
+@pytest.mark.order5
+def test_trata_col_released(movies_etl: MoviesETL) -> None:
+    new_cols = ['date', 'country']
+    base = movies_etl.dados_entrada['movies']
+    base = movies_etl.trata_col_released(base)
+    for col in new_cols:
+        assert col in base.columns
+
+    movies_etl.dados_entrada['movies'] = base
+
+
+@pytest.mark.order6
+def test_preenche_nulos(movies_etl: MoviesETL) -> None:
+    base = movies_etl.dados_entrada['movies']
+    movies_etl.preenche_nulos(base)
+    assert base['runtime'].isnull().sum().sum() == 0
+    assert base['country'].isnull().sum().sum() == 0
+
+
+@pytest.mark.order7
+def test_converte_dtypes(movies_etl: MoviesETL) -> None:
+    base = movies_etl.dados_entrada['movies']
+    base = movies_etl.converte_dtypes(base)
+    for col, dtype in INFO['DADOS_SCHEMA'].items():
+        assert base[col].dtype == dtype
+
+
+@pytest.mark.order8
+def test_renomeia_colunas(movies_etl: MoviesETL) -> None:
+    base = movies_etl.dados_entrada['movies']
+    movies_etl.renomeia_colunas(base)
+    for col in INFO['RENOMEIA_COLUNAS'].values():
+        assert col in base.columns
