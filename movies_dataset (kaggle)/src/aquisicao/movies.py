@@ -111,6 +111,32 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         for vals in vals_to_replace:
             base['country'] = base['country'].replace(vals[0], vals[1], regex=True)
 
+    @classmethod
+    def converte_dtypes(cls, base: pd.DataFrame) -> None:
+        """
+        Converte os tipos de dados de cada coluna, afim de reduzir o uso de memória
+        :param base: Dataframe a ser manipulado
+        :return: Retorna um dataframe com os dtypes convertidos
+        """
+        base['score'] = base['score'].astype(float)
+        base['votes'] = base['votes'].astype(float)
+        base['budget'] = base['budget'].astype(float)
+        base['gross'] = base['gross'].replace('', 0, regex=True).astype(float)
+        base['runtime'] = base['runtime'].astype(float).astype(int)
+
+    @classmethod
+    def dropa_string_vazia(cls, base: pd.DataFrame) -> None:
+        """
+        Dropa linhas que contém strings vazias
+        :param base: Dataframe a ser manipulado
+        """
+        cols = base.columns.values
+        for col in cols:
+            op = base.loc[lambda f: f[col] == '']
+            if len(op) != 0:
+                base.drop(op.index, inplace=True, axis='index')
+                op = base.loc[lambda f: f[col] == '']
+
     def transform(self) -> None:
         """
         Transforma os dados
@@ -131,4 +157,8 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             self.preenche_nulos(base)
             self._logger.info('SUBSTITUINDO VALORES DENTRO DAS COLUNAS')
             self.replace_values_in_cols(base)
+            self._logger.info('CONVERTENDO OS TIPOS DE DADOS')
+            self.converte_dtypes(base)
+            self._logger.info('DROPANDO STRINGS VAZIAS')
+            self.dropa_string_vazia(base)
             self._dados_saida[tabela] = base

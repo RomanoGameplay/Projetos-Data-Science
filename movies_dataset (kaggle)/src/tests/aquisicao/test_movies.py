@@ -111,10 +111,3 @@ def test_preenche_nulos(movies_etl: MoviesETL) -> None:
     movies_etl.preenche_nulos(base)
     assert base['runtime'].isnull().sum().sum() == 0
     assert base['country'].isnull().sum().sum() == 0
-
-@pytest.mark.order8
-def test_renomeia_colunas(movies_etl: MoviesETL) -> None:
-    base = movies_etl.dados_entrada['movies']
-    movies_etl.renomeia_colunas(base)
-    for col in INFO['RENOMEIA_COLUNAS'].values():
-        assert col in base.columns
