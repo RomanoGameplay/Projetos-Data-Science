@@ -27,7 +27,8 @@ class MoviesETL(BaseMovieETL, abc.ABC):
         for tabela in tqdm([self._tabela]):
             self.dados_entrada[tabela] = pd.read_csv(self._cam_entrada / f'{tabela}.csv')
 
-    def multiple_replaces(self, string: str, replacements: typing.List[typing.Tuple[str, str]]) -> str:
+    @classmethod
+    def multiple_replaces(cls, string: str, replacements: typing.List[typing.Tuple[str, str]]) -> str:
         """
         Método que realiza múltiplas substituições numa string
         :param string: String a receber as múltiplas substituições
@@ -137,6 +138,30 @@ class MoviesETL(BaseMovieETL, abc.ABC):
                 base.drop(op.index, inplace=True, axis='index')
                 op = base.loc[lambda f: f[col] == '']
 
+    @classmethod
+    def dropa_zeros(cls, base: pd.DataFrame) -> pd.DataFrame:
+        """
+        Dropa linhas das colunas budget e gross que possuem valores zero
+        :param base: Dataframe a ser manipulado
+        """
+        cols = ['budget', 'gross']
+        for col in cols:
+            base = base.loc[lambda f: f[col] != 0]
+
+        return base
+
+    @classmethod
+    def adiciona_coluna_liquid(cls, base: pd.DataFrame) -> pd.DataFrame:
+        """
+        Adiciona coluna representando o lucro líquido
+        :param base: Dataframe a ser manipulado
+        :return: Dataframe com nova coluna
+        """
+        base = base.assign(
+            liquid=lambda f: f['gross'] - f['budget']
+        )
+        return base
+
     def transform(self) -> None:
         """
         Transforma os dados
@@ -159,6 +184,9 @@ class MoviesETL(BaseMovieETL, abc.ABC):
             self.replace_values_in_cols(base)
             self._logger.info('CONVERTENDO OS TIPOS DE DADOS')
             self.converte_dtypes(base)
-            self._logger.info('DROPANDO STRINGS VAZIAS')
+            self._logger.info('ELIMINANDO VALORES ESTRANHOS')
             self.dropa_string_vazia(base)
+            base = self.dropa_zeros(base)
+            self._logger.info('ADICIONANDO COLUNA DE LUCRO LÍQUIDO')
+            base = self.adiciona_coluna_liquid(base)
             self._dados_saida[tabela] = base
