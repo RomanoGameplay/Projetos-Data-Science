@@ -70,6 +70,9 @@ class BaseBitocinUSDETL(abc.ABC):
         """
         Executa o pipeline dos dados
         """
+        self._logger.info('EXTRAINDO DADOS')
         self.extract()
+        self._logger.info('TRANSFORMANDO DADOS')
         self.transform()
+        self._logger.info('EXPORTANDO DADOS')
         self.load()
